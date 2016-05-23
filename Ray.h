@@ -12,11 +12,11 @@ public:
     m_width = 1;
     m_speed_counter = 0;
   }
-  Ray(bool dir, CRGB& color, uint8_t spd) {
+  Ray(bool dir, CRGB& color, uint8_t spd, uint8_t pos) {
     m_direction = dir;
     m_color = color;
     m_speed = spd;
-    m_position = 1;
+    m_position = pos;
     m_width = 5;
     m_speed_counter = 0;
   }

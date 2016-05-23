@@ -27,7 +27,7 @@ void fillSegment(byte note, CRGB& color) {
 }
 
 void formRay(byte note, CRGB& color, bool dir) {
-  rays.unshift(new Ray(dir, color, note));
+  rays.unshift(new Ray(dir, color, note, NUM_LEDS/2));
 }
 
 void showAllRays() {
