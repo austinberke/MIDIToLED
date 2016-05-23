@@ -9,7 +9,9 @@
 #define seg_args(OFFS, WID) \
   leds + ((NUM_LEDS / WID) * (note - OFFS)), NUM_LEDS / WID , color
   
-void fillSegment(byte note, CRGB& color) {
+void fillSegment(byte note, CRGB color) {
+  color.setParity(1); // Set parity to 1 to prevent ray overlap
+  
   if      (note < 1) // 0 .. 1 -> Full
     fill_solid(seg_args(0, 1));
   else if (note < 3) // 1 .. 3 -> 1/2
@@ -35,20 +37,22 @@ void showAllRays() {
   for (int i = 0; i != rays.size(); i++) {
     uint8_t rayPos = rays.get(i)->position();
     uint8_t rayWid = min(rays.get(i)->width(), NUM_LEDS - rayPos); // Less/equal to ray width to not overflow
-    CRGB& rayCol = rays.get(i)->color();
-    
-    if (rayPos > 0 && rays.get(i)->direction() == 0)
-      leds[rayPos-1] = black;
-    else if (rayPos > 1 && rays.get(i)->direction() == 1)
-      leds[NUM_LEDS-(rayPos-1)] = black;
- 
-    
+    CRGB rayCol = rays.get(i)->color().setParity(0); // Overlap with other rays is allowed
+
+    if (leds[rayPos].getParity() == 0) { // Rays cannot overlap static segments
+      if (rayPos > 0 && rays.get(i)->direction() == 0)
+        leds[rayPos-1] = black;
+      else if (rayPos > 1 && rays.get(i)->direction() == 1)
+        leds[NUM_LEDS-(rayPos-1)] = black;
+   
       
-    for (int j = 0; j != rayWid; j++) {
-      if (rays.get(i)->direction() == 0)
-        leds[constrain(rayPos+j, 0, NUM_LEDS-1)] = rayCol;
-      else
-        leds[constrain(NUM_LEDS-(rayPos+j), 0, NUM_LEDS-1)] = rayCol;
+        
+      for (int j = 0; j != rayWid; j++) {
+        if (rays.get(i)->direction() == 0)
+          leds[constrain(rayPos+j, 0, NUM_LEDS-1)] = rayCol;
+        else
+          leds[constrain(NUM_LEDS-(rayPos+j), 0, NUM_LEDS-1)] = rayCol;
+      }
     }
     
   
