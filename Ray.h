@@ -2,6 +2,7 @@
 #define RAY_H
 
 class Ray {
+  
 public:
   Ray() {
     m_direction = 0;
@@ -15,8 +16,8 @@ public:
     m_direction = dir;
     m_color = color;
     m_speed = spd;
-    m_position = 0;
-    m_width = 1;
+    m_position = 1;
+    m_width = 5;
     m_speed_counter = 0;
   }
 
@@ -24,16 +25,20 @@ public:
   CRGB& color() { return m_color; }
   uint8_t position() { return m_position; }
   uint8_t width() { return m_width; }
+  uint8_t speed() { return m_speed; }
+
   
-  void advance(bool expand) {
-    if (m_speed_counter != m_speed) {
-      m_speed_counter++;
-      return;
+  uint8_t advance() {
+    if (m_speed_counter < m_speed) {
+      m_speed_counter+=4;
+      return m_position;
     }
-    m_position++;
-    if (expand) m_width++;
+    
+    m_speed_counter = 0;
+    return ++m_position;
     
   }
+  
 private:
   bool m_direction;
   CRGB m_color;
