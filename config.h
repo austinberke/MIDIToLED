@@ -14,7 +14,6 @@
 #include "Ray.h"
 
 CRGB leds[NUM_LEDS];
-bool segLock[NUM_LEDS];
 LinkedList<Ray*> rays;
 CRGB black = CRGB::Black;
 

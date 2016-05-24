@@ -6,42 +6,24 @@
 //  ==============
 //     FUNCTIONS
 //  ==============
-#define seg_args(OFFS, WID) \
-  ((NUM_LEDS / WID) * (note - OFFS)), NUM_LEDS / WID , color
-  
+#define seg_args(OFFS, WID) \ 
+  leds + ((NUM_LEDS / WID) * (note - OFFS)), NUM_LEDS / WID , color
+
 void fillSegment(byte note, CRGB color) {
-  
-  if      (note < 1) { // 0 .. 1 -> Full
-    fillAndLock(seg_args(0, 1));
-  }
-  else if (note < 3) { // 1 .. 3 -> 1/2
-    fillAndLock(seg_args(1, 2));
-  }
-  else if (note < 6) { // 3 .. 6 -> 1/3
-    fillAndLock(seg_args(3, 3));
-  }
-  else if (note < 10) { // 6 .. 10 -> 1/4
-    fillAndLock(seg_args(6, 4));
-  }
-  else if (note < 18) { // 10 .. 18 -> 1/8
-    fillAndLock(seg_args(10, 8));
-  }
-  else if (note < 34) { // 18 .. 34 -> 1/16
-    fillAndLock(seg_args(18, 16));
-  }
-  else if (note < 94) {// 34 .. 94 -> 1/60
-    fillAndLock(seg_args(34, 60));
-  }
-}
-
-void fillAndLock(byte offs, byte wid, CRGB& color) {
-  fill_solid(leds+offs, wid, color);
-  lockSegment(offs,wid,color);
-}
-
-void lockSegment(byte offs, byte wid, CRGB& color) {
-  for (int i = 0; i != wid; i++)
-    segLock[constrain(offs+i,0,NUM_LEDS-1)] = color != black;
+  if      (note < 1) // 0 .. 1 -> Full
+    fill_solid(seg_args(0,1));
+  else if (note < 3) // 1 .. 3 -> 1/2
+    fill_solid(seg_args(1,2));
+  else if (note < 6) // 3 .. 6 -> 1/3
+    fill_solid(seg_args(3,3));
+  else if (note < 10) // 6 .. 10 -> 1/4
+    fill_solid(seg_args(6,4));
+  else if (note < 18) // 10 .. 18 -> 1/8
+    fill_solid(seg_args(10,8));
+  else if (note < 34) // 18 .. 34 -> 1/16
+    fill_solid(seg_args(18, 16));
+  else if (note < 94) // 34 .. 94 -> 1/60
+    fill_solid(seg_args(34,60));
 }
 
 void formRay(byte note, CRGB& color, bool dir) {
