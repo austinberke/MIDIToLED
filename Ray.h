@@ -17,7 +17,7 @@ public:
     m_color = color;
     m_speed = spd;
     m_position = pos;
-    m_width = 5;
+    m_width = 8;
     m_speed_counter = 0;
   }
 

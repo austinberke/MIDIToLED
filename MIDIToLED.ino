@@ -7,25 +7,41 @@
 //     FUNCTIONS
 //  ==============
 #define seg_args(OFFS, WID) \
-  leds + ((NUM_LEDS / WID) * (note - OFFS)), NUM_LEDS / WID , color
+  ((NUM_LEDS / WID) * (note - OFFS)), NUM_LEDS / WID , color
   
 void fillSegment(byte note, CRGB color) {
-  color.setParity(1); // Set parity to 1 to prevent ray overlap
   
-  if      (note < 1) // 0 .. 1 -> Full
-    fill_solid(seg_args(0, 1));
-  else if (note < 3) // 1 .. 3 -> 1/2
-    fill_solid(seg_args(1, 2));
-  else if (note < 6) // 3 .. 6 -> 1/3
-    fill_solid(seg_args(3, 3));
-  else if (note < 10) // 6 .. 10 -> 1/4
-    fill_solid(seg_args(6, 4));
-  else if (note < 18) // 10 .. 18 -> 1/8
-    fill_solid(seg_args(10, 8));
-  else if (note < 34) // 18 .. 34 -> 1/16
-    fill_solid(seg_args(18, 16));
-  else if (note < 94) // 34 .. 94 -> 1/60
-    fill_solid(seg_args(34, 60));
+  if      (note < 1) { // 0 .. 1 -> Full
+    fillAndLock(seg_args(0, 1));
+  }
+  else if (note < 3) { // 1 .. 3 -> 1/2
+    fillAndLock(seg_args(1, 2));
+  }
+  else if (note < 6) { // 3 .. 6 -> 1/3
+    fillAndLock(seg_args(3, 3));
+  }
+  else if (note < 10) { // 6 .. 10 -> 1/4
+    fillAndLock(seg_args(6, 4));
+  }
+  else if (note < 18) { // 10 .. 18 -> 1/8
+    fillAndLock(seg_args(10, 8));
+  }
+  else if (note < 34) { // 18 .. 34 -> 1/16
+    fillAndLock(seg_args(18, 16));
+  }
+  else if (note < 94) {// 34 .. 94 -> 1/60
+    fillAndLock(seg_args(34, 60));
+  }
+}
+
+void fillAndLock(byte offs, byte wid, CRGB& color) {
+  fill_solid(leds+offs, wid, color);
+  lockSegment(offs,wid,color);
+}
+
+void lockSegment(byte offs, byte wid, CRGB& color) {
+  for (int i = 0; i != wid; i++)
+    segLock[constrain(offs+i,0,NUM_LEDS-1)] = color != black;
 }
 
 void formRay(byte note, CRGB& color, bool dir) {
@@ -37,22 +53,18 @@ void showAllRays() {
   for (int i = 0; i != rays.size(); i++) {
     uint8_t rayPos = rays.get(i)->position();
     uint8_t rayWid = min(rays.get(i)->width(), NUM_LEDS - rayPos); // Less/equal to ray width to not overflow
-    CRGB rayCol = rays.get(i)->color().setParity(0); // Overlap with other rays is allowed
-
-    if (leds[rayPos].getParity() == 0) { // Rays cannot overlap static segments
-      if (rayPos > 0 && rays.get(i)->direction() == 0)
-        leds[rayPos-1] = black;
-      else if (rayPos > 1 && rays.get(i)->direction() == 1)
-        leds[NUM_LEDS-(rayPos-1)] = black;
-   
+    CRGB rayCol = rays.get(i)->color(); 
+    
+    if (rayPos > 0 && rays.get(i)->direction() == 0)
+      leds[rayPos-1] = black;
+    else if (rayPos > 1 && rays.get(i)->direction() == 1)
+      leds[NUM_LEDS-(rayPos-1)] = black;
       
-        
-      for (int j = 0; j != rayWid; j++) {
-        if (rays.get(i)->direction() == 0)
-          leds[constrain(rayPos+j, 0, NUM_LEDS-1)] = rayCol;
-        else
-          leds[constrain(NUM_LEDS-(rayPos+j), 0, NUM_LEDS-1)] = rayCol;
-      }
+    for (int j = 0; j != rayWid; j++) {
+      if (rays.get(i)->direction() == 0)
+        leds[constrain(rayPos+j, 0, NUM_LEDS-1)] = rayCol;
+      else
+        leds[constrain(NUM_LEDS-(rayPos+j), 0, NUM_LEDS-1)] = rayCol;
     }
     
   
@@ -83,17 +95,27 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
   CRGB color = ColorFromPalette(RainbowColors_p, velocity);
 
   switch (channel) {
-    case 1: // CHANNEL 1 -> Static Segment
+    case 1: // CHANNEL 1 -> Static Colored Segment
       fillSegment(note, color);
       break;
-    case 2: // CHANNEL 2 -> Forward Ray
+    case 2: // CHANNEL 2: -> Static White Segment
+      fillSegment(note, CRGB(CRGB::White));
+      break;
+    case 3: // CHANNEL 3 -> Forward Ray
       if (note == 127) { clearRays(); break; }
       formRay(note, color, 0);
       break;
-    case 3: // CHANNEL 3 -> Backward Ray
+    case 4: // CHANNEL 4 -> Backward Ray
       if (note == 127) { clearRays(); break; }
       formRay(note, color, 1);
       break;
+    case 5: // CHANNEL 5 -> Full Rainbow
+      fill_rainbow(leds, NUM_LEDS, note, 5);
+      break;
+    case 16: // CHANNEL 16 -> Brightness
+      FastLED.setBrightness(map(note, 0, 127, 0, 255));
+      break;
+      
 
   }
 
@@ -104,7 +126,11 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 
   switch (channel) {
     case 1:
+    case 2:
       fillSegment(note, black);
+      break;
+    case 5:
+      fillSegment(0, black);
       break;
 
   }
