@@ -1,6 +1,8 @@
 # Introduction
 MIDIToLED is a program that allows MIDI data to be used to control one or more LED strips in real-time. Its primary purpose is for use in conjunction with a DAW such as Ableton Live to synchronize lights with music. It is currently designed to be used on a Teensy 3.2 with an OctoWS2811 adapter connected to two sets of NeoPixel (WS2812B) strips.
 
+A basic demo video is available [here](https://www.youtube.com/watch?v=8L4q8ZUSSMk).
+
 # Setup
 First, adjust the settings in "config.h" to pertain to the specific length and pins of the LED strips (note that for OctoWS2811, pins 2 and 6 correspond to the orange wires of each Cat6 cable). Then, adjust each desired segment's offset and width depending on the physical layout of the strips. Within the Arduino IDE, set the Teensy to act as a MIDI divice by selecting "Tools > USB Type > MIDI."
 
@@ -32,7 +34,7 @@ CRGB noteColors[12] = {
 };
 ~~~~
 
-# License 
+# License
 
 MIDIToLED is licensed under the MIT license:
 
